@@ -1,0 +1,159 @@
+<?php
+/**
+ * MageINIC
+ * Copyright (C) 2023 MageINIC <support@mageinic.com>
+ *
+ * NOTICE OF LICENSE
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://opensource.org/licenses/gpl-3.0.html.
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category MageINIC
+ * @package Hyva_MageINICFaq
+ * @copyright Copyright (c) 2023 MageINIC (https://www.mageinic.com/)
+ * @license https://opensource.org/licenses/gpl-3.0.html GNU General Public License,version 3 (GPL-3.0)
+ * @author MageINIC <support@mageinic.com>
+ */
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Framework\Escaper;
+use MageINIC\Faq\Block\Category\Index;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+
+/**
+ * @var $block Index
+ * @var $escaper Escaper
+ * @var ViewModelRegistry $viewModels
+ * @var HeroiconsOutline $heroicons
+ */
+
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+$gliderUrl = $block->getViewFileUrl('Magento_PageBuilder::js/glider.min.js');
+$data = $block->getListOfCategory();
+$isEnableExtension = $block->isEnableExtension();
+$sliderEnbale = $block->isEnableSlider();
+$dots = $block->getHelperData()->getShowDotsByDefault();
+$arraow = $block->getHelperData()->isArrow();
+if ($isEnableExtension): ?>
+<div id="hyva-slider">
+    <div class="relative">
+    <div class="faq-category">
+        <h3 style="text-align:center"><?= $escaper->escapeHtml(__($block->getSliderTitle()))?></h3>
+        <div class="faq-slider">
+            <ul id="slider">
+                <?php foreach ($data as $val): ?>
+                    <?php if ($val->getImage()) : ?>
+                        <div id="category-groups">
+                            <div id="category-group">
+                                <div id="category-group-image" class="category-group-image">
+                                    <a href="<?= $block->getUrl('faq/category/view', ['id' => $val->getId()]); ?>">
+                                        <img src="<?= $escaper->escapeUrl(__($block->getImagePath($val['image']))); ?>"
+                                             alt="<?= $escaper->escapeHtml(__($val['category_name'])); ?>"
+                                             title="<?= $escaper->escapeHtml(__($val['category_name'])); ?>"
+                                             class="group-image" width="" height=""/>
+                                    </a>
+                                    <div class="category-groupname">
+                                        <a href="<?= $escaper->escapeUrl($block
+                                            ->getUrl('faq/category/view', ['id' => $val->getId()])) ?>">
+                                            <?= $escaper->escapeHtml(__($val['category_name'])); ?>
+                                            <?php $value = $block->getFaqQuesCount($val->getId()); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </ul>
+            <div class="arrows flex items-center justify-center flex-1 p-4">
+                <?php if ($arraow): ?>
+                    <button
+                        aria-label="<?= $escaper->escapeHtml(__('Previous')) ?>"
+                        class="<?= $block->getHelperData()->isArrow()  ? 'glider-prev' : "hidden" ?>  w-8 h-8 mr-1
+                         text-black rounded-full outline-none focus:outline-none absolute top-[50%] -left-[30px]
+                         transform translate-x-[-50%] translate-y-[-50%] border border-solid border-gray-300 flex
+                         items-center justify-center">
+                        <?= $heroicons->chevronLeftHtml("w-5 h-5", 25, 25, ['aria-hidden' => 'true']); ?>
+                    </button>
+                    <div role="tablist"
+                         class="select-none flex flex-wrap
+                          mx-1 justify-center p-0 focus:outline-none"></div>
+                    <button
+                        aria-label="<?= $escaper->escapeHtml(__('Next')) ?>"
+                        class="<?= $block->getHelperData()->isArrow()  ? 'glider-next' : "hidden" ?> w-8 h-8 ml-1
+                         text-black rounded-full outline-none focus:outline-none absolute top-[50%] -right-[56px]
+                         transform translate-x-[-50%] translate-y-[-50%] border border-solid border-gray-300 flex
+                         items-center justify-center">
+                        <?= $heroicons->chevronRightHtml("w-5 h-5", 25, 25, ['aria-hidden' => 'true']); ?>
+                    </button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="carousel-nav flex items-center justify-center flex-1 p-4">
+            <div role="tablist" class="glider-dots select-none flex flex-wrap
+                    mx-1 justify-center p-0 focus:outline-none"></div>
+        </div>
+    </div>
+    </div>
+</div>
+    <script>
+        var millisecond = <?= $escaper->escapeHtml($block->getHelperData()->getAutoPlaySpeed())
+            ? $escaper->escapeHtml($block->getHelperData()->getAutoPlaySpeed()) : 0 ?>;
+        var breakPoint = <?= /* @noEscape */ $block->getHelperData()->getBreakPoints() ?>;
+        const gliderLibrary = document.createElement('script');
+        gliderLibrary.type = 'text/javascript';
+        gliderLibrary.src = '<?= $escaper->escapeJs($escaper->escapeUrl($gliderUrl)) ?>';
+        gliderLibrary.addEventListener('load', () => {
+            const glider = new Glider(document.getElementById("slider"), {
+                slidesToShow: <?= $escaper->escapeHtml($block->getHelperData()->getDefaultSlide())
+                    ? $escaper->escapeHtml($block->getHelperData()->getDefaultSlide()) : 1 ?>,
+                slidesToScroll: <?= $escaper->escapeHtml($block->getHelperData()->getDefaultSlick())
+                    ? $escaper->escapeHtml($block->getHelperData()->getDefaultSlick()) : 1 ?>,
+                draggable: true,
+                rewind: <?= $escaper->escapeHtml($block->getHelperData()->getInfiniteLooping())
+                    ? $escaper->escapeHtml($block->getHelperData()->getInfiniteLooping()) : "false" ?>,
+                dots: true,
+                arrows: {
+                    prev: <?= $block->getHelperData()->isArrow()  ? '".glider-prev"' : "false" ?>,
+                    next: <?= $block->getHelperData()->isArrow()  ? '".glider-next"' : "false" ?>
+                },
+                responsive:breakPoint,
+            });
+            <?php if ($block->getHelperData()->getAutoplaySpeed() != 0 && $block->getHelperData()->getAutoPlay()): ?>
+            gliderAutoplay(
+                glider,
+                millisecond,
+                true
+            );
+            <?php endif; ?>
+        });
+
+        const gliderAutoplay = (glider, milliseconds, loop) => {
+            const pagesCount = glider.track.childElementCount;
+            let slideTimeout = null;
+            let nextIndex = 1;
+            let paused = false;
+            const slide = () => {
+                slideTimeout = setTimeout(
+                    () => {
+                        if (loop && nextIndex >= pagesCount) {
+                            nextIndex = 0;
+                        }
+                        glider.scrollItem(nextIndex);
+                    },
+                    parseInt(milliseconds)
+                );
+            };
+            slide();
+        };
+        document.head.appendChild(gliderLibrary);
+    </script>
+<?php endif;?>

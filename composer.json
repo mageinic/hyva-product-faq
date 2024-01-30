@@ -1,0 +1,33 @@
+{
+    "name": "mageinic/hyva-faq",
+    "description": "FAQ by MageINIC. Product FAQ empowers you to effortlessly create and manage a comprehensive FAQ section, enhancing customer satisfaction and conversion rates. Organize FAQs into categories, use expandable sections for detailed answers, and seamlessly integrate FAQs into product pages.",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.0",
+        "mageinic/core": "1.0.*",
+        "mageinic/faq": "1.0.*",
+        "magento/module-catalog" : "104.0.*"
+    },
+    "type": "magento2-module",
+    "keywords": ["mageinic", "core", "magento 2"],
+    "homepage": "https://github.com/mageinic",
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "authors": [
+        {
+            "name": "MageINIC",
+            "email": "support@mageinic.com",
+            "homepage": "https://www.mageinic.com"
+        }
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Hyva\\Faq\\": ""
+        }
+    }
+}

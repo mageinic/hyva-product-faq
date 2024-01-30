@@ -1,0 +1,240 @@
+<?php
+/**
+ * MageINIC
+ * Copyright (C) 2023 MageINIC <support@mageinic.com>
+ *
+ * NOTICE OF LICENSE
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://opensource.org/licenses/gpl-3.0.html.
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category MageINIC
+ * @package Hyva_MageINICFaq
+ * @copyright Copyright (c) 2023 MageINIC (https://www.mageinic.com/)
+ * @license https://opensource.org/licenses/gpl-3.0.html GNU General Public License,version 3 (GPL-3.0)
+ * @author MageINIC <support@mageinic.com>
+ */
+
+use MageINIC\Faq\Block\Faq\View;
+use Magento\Framework\Escaper;
+use Hyva\GraphqlViewModel\ViewModel\GraphqlViewModel;
+
+/**
+ * @var $block View
+ * @var $escaper Escaper
+ */
+/** @var GraphqlViewModel $gqlViewModel */
+
+
+/** @var \Hyva\Theme\Model\ViewModelRegistry $viewModels */
+/** @var \Hyva\Theme\ViewModel\Modal $modalViewModel */
+$modalViewModel = $viewModels->require(\Hyva\Theme\ViewModel\Modal::class);
+/** @var GraphqlViewModel $gqlViewModel */
+$gqlViewModel = $viewModels->require(GraphqlViewModel::class);
+$product = $block->getCurrentProduct();
+$customerData = $block->getCurrentCustomer();
+$enable = $block->isExtensionEnable();
+$formUrl = $block->setFormAction('faq/faq/faqpopupform');
+$faqCollection = $block->getFaqCollection($product->getId());
+$formkey = $block->getBlockHtml('formkey');
+$productId = $product->getId();
+if ($enable): ?>
+    <div class="faq-category-que">
+        <div id="faq-info" class="faq-main">
+            <ol class="items faqs-list">
+                <?php foreach ($faqCollection as $faqData): ?>
+                    <div x-data="{ expanded: false }">
+                        <li class="item" @click="expanded = ! expanded" data-role="collapsible">
+                            <div class="faq-title" data-role="trigger">
+                                <strong>
+                                    <?= $escaper->escapeHtml(__('Q. ')) ?>
+                                    <?= $escaper->escapeHtml(__($faqData['title'])) ?>
+                                </strong>
+                                <span class="down-arrow"></span>
+                            </div>
+                            <div class="faq-ans" x-show="expanded" x-collapse data-role="content">
+                                <p><?= /* @noEscape */ $faqData['answer'] ?></p>
+                                <div class="faq-details">
+                                    <?= $escaper->escapeHtml(__('By '))?>
+                                    <span class="faq-sender-name">
+                                        <strong>
+                                            <?= $faqData['sender_name'] ?>
+                                        </strong>
+                                    </span>
+                                    <?= $escaper->escapeHtml(__(
+                                        'On '))?>
+                                    <span class="faq-time">
+                                        <strong>
+                                            <?php $item = $faqData['created_date'];?>
+                                            <?= date_format(date_create($item), "F d, y h:i:s A"); ?>
+                                        </strong>
+                                    </span>
+                                </div>
+                            </div>
+                        </li>
+                    </div>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </div>
+    <div class="faq-ques-more-detail">
+        <a href="<?= $escaper->escapeUrl($block->setMoreInformation('faq/index/index')) ?>" class="text-base leading-6">
+            <?= $escaper->escapeHtml(__('Read More All Questions and Answers')) ?>
+        </a>
+    </div>
+    <div class="faq-ask-question">
+        <h3 class="text-2xl mb-2 font-semibold mt-1"><?= $escaper->escapeHtml(__('Have a Question?')) ?></h3>
+        <p><?= $escaper->escapeHtml(__('Get Answer from experts and customer who have used this item.')) ?></p>
+
+    </div>
+    <div x-data="initFaqForm()" class="mt-2">
+        <button @click="openModal" type="button" id="click-me" class="btn btn-primary">
+            <?= $escaper->escapeHtml(__('Ask a Questions')) ?>
+        </button>
+        <template x-if="showModal">
+            <div x-cloak>
+                <div class="fixed inset-0 flex items-center justify-center z-[999]">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="closeModal">
+                        <div class="absolute inset-0 bg-black opacity-75"></div>
+                    </div>
+
+                    <div class="relative bg-white p-8 rounded-lg shadow-xl min-w-[400px]" id="faq-popup-modal">
+                        <div id="popup-modal">
+                            <form class="form"
+                                  id="faq-form"
+                                  method="post"
+                                  data-mage-init='{"validation":{}}'
+                                  autocomplete="off" action=""
+                                  enctype='multipart/form-data'
+                                  data-hasrequired="<?= $escaper->escapeHtml(__('* Required Fields')) ?>">
+                                <fieldset class="fieldset">
+                                    <legend class="legend text-center">
+                                        <span><?= $escaper->escapeHtml(__('Write Your Own Question')) ?></span>
+                                    </legend>
+                                    <div id="response-message"></div>
+                                    <input type="hidden" name="product_id" id="product_id"
+                                           value="<?= $escaper->escapeHtml(__($product->getId())) ?>"/>
+                                    <input type="hidden" name="status" id="status" value="0"/>
+                                    <input type="hidden" name="visibility" id="visibility" value="0"/>
+                                    <div class="field faq details required mb-3">
+                                        <label for="sender_name" class="label mb-1">
+                                            <span><?= $escaper->escapeHtml(__('Name')) ?></span>
+                                        </label>
+                                        <div class="control">
+                                            <input type="text" name="sender_name" id="sender_name"
+                                                   value="<?php if ($customerData): ?>
+                                            <?= $escaper->escapeHtml(__($customerData->getName()));
+                                                   endif; ?>"
+                                                   title="<?= $escaper->escapeHtml(__('Name')) ?>"
+                                                   class="form-input w-full" data-validate="{required:true}"
+                                                   placeholder="<?= $escaper->escapeHtml(__('Name')) ?>">
+                                        </div>
+                                    </div>
+                                    <div class="field faq details required mb-3">
+                                        <label for="sender_email" class="label mb-1">
+                                            <span><?= $escaper->escapeHtml(__('Email Address')) ?></span>
+                                        </label>
+                                        <div class="control">
+                                            <input type="email" name="sender_email" id="sender_email"
+                                                   value="<?php if ($customerData): ?>
+                                            <?= $escaper->escapeHtml(__($customerData->getEmail()));
+                                                   endif; ?>"
+                                                   title="<?= $escaper->escapeHtml(__('Email Address')) ?>"
+                                                   class="form-input w-full" data-validate="{required:true}"
+                                                   placeholder="<?= $escaper->escapeHtml(__('Email Address')) ?>">
+                                        </div>
+                                    </div>
+                                    <div class="field faq details required mb-3">
+                                        <label for="title" class="label mb-1">
+                                            <span><?= $escaper->escapeHtml(__('Question')) ?></span>
+                                        </label>
+                                        <div class="control">
+                                            <input type="text" name="title" id="title" value=""
+                                                   title="<?= $escaper->escapeHtml(__('Question')) ?>"
+                                                   class="form-input w-full" data-validate="{required:true}"
+                                                   placeholder="<?= $escaper->escapeHtml(__('Question')) ?>">
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-center mt-2">
+                                        <button class="btn btn-primary" @click.prevent="submitForm(<?= (int)$product->getId() ?>)">Submit</button>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+<?php endif; ?>
+<script>
+    "use strict";
+    function initFaqForm() {
+        return {
+            sender_name: "test",
+            sender_email: "test@gmail.com",
+            title: "testing?",
+            showModal: false,
+
+            openModal() {
+                this.showModal = true;
+            },
+            closeModal() {
+                this.showModal = false;
+            },
+            dispatchMessage(type, message, timeout) {
+                typeof window.dispatchMessages && window.dispatchMessages(
+                    [{
+                        type: type,
+                        text: message,
+                    }],
+                    timeout
+                );
+            },
+            submitForm(productId) {
+                const formKey = hyva.getFormKey();
+                const postUrl = BASE_URL + 'faq/faq/faqpopupform/';
+                const sender_name = document.getElementById('sender_name').value;
+                const sender_email = document.getElementById('sender_email').value;
+                const title = document.getElementById('title').value;
+                let status = 0;
+                let visibility = 0;
+                fetch(postUrl, {
+                    "headers": {
+                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                    },
+                    "body": "form_key=" + formKey + "&product_id=" + productId + "&sender_name=" + sender_name +  "&sender_email=" + sender_email + "&status=" + status + "&visibility=" + visibility + "&title=" + title,
+                    "method": "POST",
+                    "mode": "cors",
+                    "credentials": "include"
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        window.dispatchMessages && window.dispatchMessages([{
+                            type: 'warning',
+                            text: result.message
+                        }]);
+                        this.isLoading = false;
+                    }
+                }).then(result => {
+                    window.dispatchMessages && window.dispatchMessages([{
+                        type: result.status ? 'success' : 'error',
+                        text: result.message
+                    }], result.status ? 5000 : 0)
+                    this.showModal = false;
+                });
+            }
+        };
+    }
+</script>
+
+
