@@ -1,6 +1,6 @@
-# Hyvä Faq
+# Hyvä Product FAQ
 
-**Hyvä Faq is a part of MageINIC Faq extension that adds Hyvä features.** This extension extends Faq definitions.
+**Hyvä Product FAQ is a part of MageINIC Product FAQ extension that adds Hyvä features.** This extension extends Product FAQ definitions.
 
 ## 1. How to install
 
@@ -18,7 +18,7 @@ php bin/magento cache:flush
 ```
 
 **Note:**
-Magento 2 Faq requires installing [MageINIC Faq](https://github.com/mageinic/faq) in your Magento installation.
+Magento 2 Product FAQ requires installing [MageINIC Product FAQ](https://github.com/mageinic/faq) in your Magento installation.
 
 **Or Install via composer [Recommend]**
 ```
